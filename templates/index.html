@@ -29,3 +29,32 @@
     </table>
 </body>
 </html>
+
+<script>
+    function fetchData() {
+        fetch('/update')
+            .then(response => response.json())
+            .then(data => {
+                // Update the table with new data
+                let table = document.querySelector('table');
+                table.innerHTML = `
+                    <tr>
+                        <th>Symbol</th>
+                        <th>Relative Volume</th>
+                        <th>Price</th>
+                    </tr>
+                `;
+                data.forEach(stock => {
+                    let row = table.insertRow();
+                    row.insertCell(0).innerHTML = `<a href="/news/${stock.symbol}">${stock.symbol}</a>`;
+                    row.insertCell(1).innerHTML = stock.relative_volume;
+                    row.insertCell(2).innerHTML = stock.price;
+                });
+            });
+    }
+    
+    // Fetch data every 5 minutes
+    setInterval(fetchData, 300000);
+    fetchData();  // Initial fetch
+    </script>
+    
