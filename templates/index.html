@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Stock Analysis</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>Top 10 Stocks by Relative Volume</h1>
+    <form method="GET" action="/">
+        <label for="price_min">Min Price:</label>
+        <input type="number" name="price_min" step="0.01">
+        <label for="price_max">Max Price:</label>
+        <input type="number" name="price_max" step="0.01">
+        <input type="submit" value="Filter">
+    </form>
+    <table>
+        <tr>
+            <th>Symbol</th>
+            <th>Relative Volume</th>
+            <th>Price</th>
+        </tr>
+        {% for stock in stocks %}
+        <tr>
+            <td><a href="/news/{{ stock.symbol }}">{{ stock.symbol }}</a></td>
+            <td>{{ stock.relative_volume }}</td>
+            <td>{{ stock.price }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
