@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>News for {{ symbol }}</title>
+</head>
+<body>
+    <h1>Latest News for {{ symbol }}</h1>
+    <div>
+        {% for article in news %}
+        <div>
+            <h2>{{ article.title }}</h2>
+            <p>{{ article.description }}</p>
+            <a href="{{ article.url }}" target="_blank">Read more</a>
+        </div>
+        {% endfor %}
+    </div>
+    <a href="/">Back to Stock Analysis</a>
+</body>
+</html>

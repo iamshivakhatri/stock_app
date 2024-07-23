@@ -29,11 +29,12 @@ class StockData(db.Model):
     timestamp = db.Column(db.DateTime, nullable=False, default=pd.Timestamp.now)
 
 # Initialize database
-db.create_all()
+with app.app_context():
+    db.create_all()
 
 # Fetch stock data from API
 def fetch_stock_data():
-    symbols = ["AAPL", "GOOGL", "MSFT", "AMZN", "FB", "TSLA", "NFLX", "NVDA", "ADBE", "PYPL"]
+    symbols = ["AAPL", "GOOGL", "MSFT", "AMZN", "META", "TSLA", "NFLX", "NVDA", "ADBE", "PYPL"]
     stock_data = []
     for symbol in symbols:
         try:
@@ -64,7 +65,9 @@ def get_stock_data():
 
 @app.route('/')
 def index():
-    stocks = get_stock_data()
+    price_min = request.args.get('price_min', default=0, type=float)
+    price_max = request.args.get('price_max', default=float('inf'), type=float)
+    stocks = [stock for stock in get_stock_data() if price_min <= stock['price'] <= price_max]
     return render_template('index.html', stocks=stocks)
 
 @app.route('/update')
@@ -83,8 +86,15 @@ def news(symbol):
     news_data = fetch_stock_news(symbol)
     return render_template('news.html', symbol=symbol, news=news_data)
 
+@app.route('/search_news', methods=['GET'])
+def search_news():
+    symbol = request.args.get('symbol')
+    news_data = fetch_stock_news(symbol)
+    return jsonify(news_data)
+
 if __name__ == '__main__':
     scheduler = BackgroundScheduler()
     scheduler.add_job(func=fetch_stock_data, trigger="interval", seconds=300)
     scheduler.start()
+    
     app.run(debug=True)

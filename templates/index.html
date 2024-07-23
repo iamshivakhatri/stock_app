@@ -27,34 +27,73 @@
         </tr>
         {% endfor %}
     </table>
+
+    <h2>Search Stock News</h2>
+    <form id="search-form">
+        <input type="text" id="search-symbol" placeholder="Enter stock symbol">
+        <button type="submit">Search</button>
+    </form>
+
+    <h2>Latest News</h2>
+    <div id="news-section"></div>
+
+    <script>
+        function fetchData() {
+            fetch('/update')
+                .then(response => response.json())
+                .then(data => {
+                    // Update the table with new data
+                    let table = document.querySelector('table');
+                    table.innerHTML = `
+                        <tr>
+                            <th>Symbol</th>
+                            <th>Relative Volume</th>
+                            <th>Price</th>
+                        </tr>
+                    `;
+                    data.forEach(stock => {
+                        let row = table.insertRow();
+                        row.insertCell(0).innerHTML = `<a href="/news/${stock.symbol}">${stock.symbol}</a>`;
+                        row.insertCell(1).innerHTML = stock.relative_volume;
+                        row.insertCell(2).innerHTML = stock.price;
+                    });
+                });
+        }
+
+        function fetchNews() {
+            fetch('/news/AAPL')  // Fetch news for a default stock symbol initially
+                .then(response => response.json())
+                .then(data => {
+                    let newsSection = document.getElementById('news-section');
+                    newsSection.innerHTML = '';
+                    data.forEach(article => {
+                        let newsItem = document.createElement('div');
+                        newsItem.innerHTML = `<h3>${article.title}</h3><p>${article.description}</p><a href="${article.url}" target="_blank">Read more</a>`;
+                        newsSection.appendChild(newsItem);
+                    });
+                });
+        }
+
+        document.getElementById('search-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            let symbol = document.getElementById('search-symbol').value;
+            fetch(`/search_news?symbol=${symbol}`)
+                .then(response => response.json())
+                .then(data => {
+                    let newsSection = document.getElementById('news-section');
+                    newsSection.innerHTML = '';
+                    data.forEach(article => {
+                        let newsItem = document.createElement('div');
+                        newsItem.innerHTML = `<h3>${article.title}</h3><p>${article.description}</p><a href="${article.url}" target="_blank">Read more</a>`;
+                        newsSection.appendChild(newsItem);
+                    });
+                });
+        });
+
+        // Fetch data every 5 minutes
+        setInterval(fetchData, 300000);
+        fetchData();  // Initial fetch
+        fetchNews();  // Initial news fetch
+    </script>
 </body>
 </html>
-
-<script>
-    function fetchData() {
-        fetch('/update')
-            .then(response => response.json())
-            .then(data => {
-                // Update the table with new data
-                let table = document.querySelector('table');
-                table.innerHTML = `
-                    <tr>
-                        <th>Symbol</th>
-                        <th>Relative Volume</th>
-                        <th>Price</th>
-                    </tr>
-                `;
-                data.forEach(stock => {
-                    let row = table.insertRow();
-                    row.insertCell(0).innerHTML = `<a href="/news/${stock.symbol}">${stock.symbol}</a>`;
-                    row.insertCell(1).innerHTML = stock.relative_volume;
-                    row.insertCell(2).innerHTML = stock.price;
-                });
-            });
-    }
-    
-    // Fetch data every 5 minutes
-    setInterval(fetchData, 300000);
-    fetchData();  // Initial fetch
-    </script>
-    
